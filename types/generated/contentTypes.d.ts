@@ -360,6 +360,152 @@ export interface AdminTransferTokenPermission extends Schema.CollectionType {
   }
 }
 
+export interface ApiProductProduct extends Schema.CollectionType {
+  collectionName: 'products'
+  info: {
+    singularName: 'product'
+    pluralName: 'products'
+    displayName: 'product'
+    description: ''
+  }
+  options: {
+    draftAndPublish: true
+  }
+  attributes: {
+    title: Attribute.String &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        minLength: 2
+      }>
+    description: Attribute.Text
+    images: Attribute.Media & Attribute.Required
+    product_colors: Attribute.Relation<
+      'api::product.product',
+      'manyToMany',
+      'api::product-color.product-color'
+    >
+    createdAt: Attribute.DateTime
+    updatedAt: Attribute.DateTime
+    publishedAt: Attribute.DateTime
+    createdBy: Attribute.Relation<
+      'api::product.product',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private
+    updatedBy: Attribute.Relation<
+      'api::product.product',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private
+  }
+}
+
+export interface ApiProductColorProductColor extends Schema.CollectionType {
+  collectionName: 'product_colors'
+  info: {
+    singularName: 'product-color'
+    pluralName: 'product-colors'
+    displayName: 'ProductColor'
+    description: ''
+  }
+  options: {
+    draftAndPublish: true
+  }
+  attributes: {
+    name: Attribute.String &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        minLength: 2
+      }>
+    price: Attribute.Decimal &
+      Attribute.Required &
+      Attribute.SetMinMax<
+        {
+          min: 0
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>
+    review: Attribute.Decimal &
+      Attribute.SetMinMax<
+        {
+          min: 0
+          max: 5
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>
+    images: Attribute.Media & Attribute.Required
+    amount: Attribute.Integer &
+      Attribute.Required &
+      Attribute.SetMinMax<
+        {
+          min: 0
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>
+    sizes: Attribute.Relation<
+      'api::product-color.product-color',
+      'manyToMany',
+      'api::size.size'
+    >
+    products: Attribute.Relation<
+      'api::product-color.product-color',
+      'manyToMany',
+      'api::product.product'
+    >
+    createdAt: Attribute.DateTime
+    updatedAt: Attribute.DateTime
+    publishedAt: Attribute.DateTime
+    createdBy: Attribute.Relation<
+      'api::product-color.product-color',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private
+    updatedBy: Attribute.Relation<
+      'api::product-color.product-color',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private
+  }
+}
+
+export interface ApiSizeSize extends Schema.CollectionType {
+  collectionName: 'sizes'
+  info: {
+    singularName: 'size'
+    pluralName: 'sizes'
+    displayName: 'Size'
+    description: ''
+  }
+  options: {
+    draftAndPublish: false
+  }
+  attributes: {
+    label: Attribute.String &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        minLength: 1
+      }>
+    product_colors: Attribute.Relation<
+      'api::size.size',
+      'manyToMany',
+      'api::product-color.product-color'
+    >
+    createdAt: Attribute.DateTime
+    updatedAt: Attribute.DateTime
+    createdBy: Attribute.Relation<'api::size.size', 'oneToOne', 'admin::user'> &
+      Attribute.Private
+    updatedBy: Attribute.Relation<'api::size.size', 'oneToOne', 'admin::user'> &
+      Attribute.Private
+  }
+}
+
 export interface PluginUploadFile extends Schema.CollectionType {
   collectionName: 'files'
   info: {
@@ -796,6 +942,9 @@ declare module '@strapi/types' {
       'admin::api-token-permission': AdminApiTokenPermission
       'admin::transfer-token': AdminTransferToken
       'admin::transfer-token-permission': AdminTransferTokenPermission
+      'api::product.product': ApiProductProduct
+      'api::product-color.product-color': ApiProductColorProductColor
+      'api::size.size': ApiSizeSize
       'plugin::upload.file': PluginUploadFile
       'plugin::upload.folder': PluginUploadFolder
       'plugin::content-releases.release': PluginContentReleasesRelease
