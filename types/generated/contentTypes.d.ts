@@ -588,6 +588,53 @@ export interface PluginContentReleasesReleaseAction
   }
 }
 
+export interface PluginI18NLocale extends Schema.CollectionType {
+  collectionName: 'i18n_locale'
+  info: {
+    singularName: 'locale'
+    pluralName: 'locales'
+    collectionName: 'locales'
+    displayName: 'Locale'
+    description: ''
+  }
+  options: {
+    draftAndPublish: false
+  }
+  pluginOptions: {
+    'content-manager': {
+      visible: false
+    }
+    'content-type-builder': {
+      visible: false
+    }
+  }
+  attributes: {
+    name: Attribute.String &
+      Attribute.SetMinMax<
+        {
+          min: 1
+          max: 50
+        },
+        number
+      >
+    code: Attribute.String & Attribute.Unique
+    createdAt: Attribute.DateTime
+    updatedAt: Attribute.DateTime
+    createdBy: Attribute.Relation<
+      'plugin::i18n.locale',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private
+    updatedBy: Attribute.Relation<
+      'plugin::i18n.locale',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private
+  }
+}
+
 export interface PluginUsersPermissionsPermission
   extends Schema.CollectionType {
   collectionName: 'up_permissions'
@@ -739,49 +786,148 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
   }
 }
 
-export interface PluginI18NLocale extends Schema.CollectionType {
-  collectionName: 'i18n_locale'
+export interface ApiProductProduct extends Schema.CollectionType {
+  collectionName: 'products'
   info: {
-    singularName: 'locale'
-    pluralName: 'locales'
-    collectionName: 'locales'
-    displayName: 'Locale'
+    singularName: 'product'
+    pluralName: 'products'
+    displayName: 'product'
     description: ''
   }
   options: {
-    draftAndPublish: false
-  }
-  pluginOptions: {
-    'content-manager': {
-      visible: false
-    }
-    'content-type-builder': {
-      visible: false
-    }
+    draftAndPublish: true
   }
   attributes: {
-    name: Attribute.String &
-      Attribute.SetMinMax<
-        {
-          min: 1
-          max: 50
-        },
-        number
-      >
-    code: Attribute.String & Attribute.Unique
+    title: Attribute.String &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        minLength: 2
+      }>
+    description: Attribute.Text
+    images: Attribute.Media & Attribute.Required
+    product_colors: Attribute.Relation<
+      'api::product.product',
+      'manyToMany',
+      'api::product-color.product-color'
+    >
     createdAt: Attribute.DateTime
     updatedAt: Attribute.DateTime
+    publishedAt: Attribute.DateTime
     createdBy: Attribute.Relation<
-      'plugin::i18n.locale',
+      'api::product.product',
       'oneToOne',
       'admin::user'
     > &
       Attribute.Private
     updatedBy: Attribute.Relation<
-      'plugin::i18n.locale',
+      'api::product.product',
       'oneToOne',
       'admin::user'
     > &
+      Attribute.Private
+  }
+}
+
+export interface ApiProductColorProductColor extends Schema.CollectionType {
+  collectionName: 'product_colors'
+  info: {
+    singularName: 'product-color'
+    pluralName: 'product-colors'
+    displayName: 'ProductColor'
+    description: ''
+  }
+  options: {
+    draftAndPublish: true
+  }
+  attributes: {
+    name: Attribute.String &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        minLength: 2
+      }>
+    price: Attribute.Decimal &
+      Attribute.Required &
+      Attribute.SetMinMax<
+        {
+          min: 0
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>
+    review: Attribute.Decimal &
+      Attribute.SetMinMax<
+        {
+          min: 0
+          max: 5
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>
+    images: Attribute.Media & Attribute.Required
+    amount: Attribute.Integer &
+      Attribute.Required &
+      Attribute.SetMinMax<
+        {
+          min: 0
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>
+    sizes: Attribute.Relation<
+      'api::product-color.product-color',
+      'manyToMany',
+      'api::size.size'
+    >
+    products: Attribute.Relation<
+      'api::product-color.product-color',
+      'manyToMany',
+      'api::product.product'
+    >
+    createdAt: Attribute.DateTime
+    updatedAt: Attribute.DateTime
+    publishedAt: Attribute.DateTime
+    createdBy: Attribute.Relation<
+      'api::product-color.product-color',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private
+    updatedBy: Attribute.Relation<
+      'api::product-color.product-color',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private
+  }
+}
+
+export interface ApiSizeSize extends Schema.CollectionType {
+  collectionName: 'sizes'
+  info: {
+    singularName: 'size'
+    pluralName: 'sizes'
+    displayName: 'Size'
+    description: ''
+  }
+  options: {
+    draftAndPublish: false
+  }
+  attributes: {
+    label: Attribute.String &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        minLength: 1
+      }>
+    product_colors: Attribute.Relation<
+      'api::size.size',
+      'manyToMany',
+      'api::product-color.product-color'
+    >
+    createdAt: Attribute.DateTime
+    updatedAt: Attribute.DateTime
+    createdBy: Attribute.Relation<'api::size.size', 'oneToOne', 'admin::user'> &
+      Attribute.Private
+    updatedBy: Attribute.Relation<'api::size.size', 'oneToOne', 'admin::user'> &
       Attribute.Private
   }
 }
@@ -800,10 +946,13 @@ declare module '@strapi/types' {
       'plugin::upload.folder': PluginUploadFolder
       'plugin::content-releases.release': PluginContentReleasesRelease
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction
+      'plugin::i18n.locale': PluginI18NLocale
       'plugin::users-permissions.permission': PluginUsersPermissionsPermission
       'plugin::users-permissions.role': PluginUsersPermissionsRole
       'plugin::users-permissions.user': PluginUsersPermissionsUser
-      'plugin::i18n.locale': PluginI18NLocale
+      'api::product.product': ApiProductProduct
+      'api::product-color.product-color': ApiProductColorProductColor
+      'api::size.size': ApiSizeSize
     }
   }
 }
