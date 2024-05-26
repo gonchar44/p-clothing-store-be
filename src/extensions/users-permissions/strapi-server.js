@@ -6,7 +6,6 @@ const {
   validateCallbackBody
 } = require('../users-permissions/controllers/validation/auth')
 
-const { setMaxListeners } = require('process')
 const { sanitize } = utils
 const { ApplicationError, ValidationError } = utils.errors
 
@@ -216,11 +215,7 @@ module.exports = (plugin) => {
       throw new ApplicationError('Email is already taken')
     }
 
-    if (settings.email_confirmation) {
-      params.confirmed = false
-    } else {
-      params.confirmed = true
-    }
+    params.confirmed = !settings.email_confirmation
 
     const user =
       await strapi.plugins['users-permissions'].services.user.add(params)
